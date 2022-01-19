@@ -1,31 +1,59 @@
 # ts-async-bootstrap
 
-## Development
+Easily setup async typescript applications!
 
-Run a dev test with `npm start`
+## Rationale
 
-## Running Tests
+When writing node applications, it's a good idea to split up your initialization (database setup, logging setup, etc) from your application entrypoint, that way the initialization can be used for other entry-points (such as admin scripts, scheduled tasks, etc). This package assists bootstrapping the initialization and main function, as well as error handling.
 
-To run unit tests, `npm run test`
+## Setup
 
-## Compiling
+**Install**
 
-### Debug Builds
+`npm i ts-async-bootstrap`
 
-To compile a debug build, run `npm run build:dev`. The build output will appear in the `./dist` folder.
+**Usage**
 
-### Prod Builds
+```typescript
+async function setup(): Promise<void> {
+	// TODO: Setup some stuff!
+}
 
-To compile a production build, run `npm run build:prod`. The build output will appear in the `./dist` folder.
+async function main(): Promise<void> {
+	// TODO: Run some stuff!
+}
 
-### Clean Builds
+async function errorHandler(e): Promise<void> {
+	// TODO: Log some stuff!
+}
 
-To generate a clean build (removes old artifacts and reruns pre&post process scripts), append `:clean` to a build script:
-- Debug: `npm run build:dev:clean`
-- Release: `npm run build:prod:clean`
+/**
+ * Bootstrap the application
+ */
+bootstrap({
+	register: setup,
+	run: main,
+	errorHandler: errorHandler
+});
+```
 
-## More
+## Lifecycle
 
-### Generating Docs
+### Register
 
-`npm run doc` and browse docs/index.html!
+First, `bootstrap()` calls your register function, which will setup any dependencies/services/etc before running the main function
+
+### Run
+
+Next, your run function is called. This could be the main function of the application, or a admin/scheduled task
+
+### Exit
+
+After the run function completes, the application will exit (you can change this by setting `shouldExit: false`)
+
+### Error
+
+If an exception is thrown or a promise is rejected during register or run, the errorHandler function will be called.
+- If `shouldExit` is true (default), the application will exit with a non-zero exit code
+- If `errorHandler` is not set, `console.error` will be used to log the error
+- If the error occured in the register function, the run function will not be called
