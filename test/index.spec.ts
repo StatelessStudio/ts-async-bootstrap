@@ -20,10 +20,10 @@ describe('BootstrapOptions', () => {
 
 	it('accepts an option to exit after completion', () => {
 		const options: Partial<BootstrapOptions> = {
-			shouldExit: true
+			shouldExitOnError: true
 		};
 
-		expect(options.shouldExit).toBeTrue();
+		expect(options.shouldExitOnError).toBeTrue();
 	});
 
 	it('accepts a error callback', () => {
@@ -40,7 +40,7 @@ describe('bootstrap', () => {
 		let registered = null;
 
 		bootstrap({
-			shouldExit: false,
+			shouldExitOnError: false,
 			register: async () => (new Promise((accept) => {
 				setTimeout(() => {
 					registered = true;
@@ -53,7 +53,7 @@ describe('bootstrap', () => {
 
 	it('runs the error handler if an error is thrown from register()', () => {
 		bootstrap({
-			shouldExit: false,
+			shouldExitOnError: false,
 			register: async () => {
 				throw new Error('test');
 			},
@@ -64,7 +64,7 @@ describe('bootstrap', () => {
 
 	it('runs the error handler if an error is thrown from run()', () => {
 		bootstrap({
-			shouldExit: false,
+			shouldExitOnError: false,
 			register: async () => {},
 			run: async () => {
 				throw new Error('test');
@@ -76,7 +76,7 @@ describe('bootstrap', () => {
 	it('can run without a register function', async () => {
 		const returned = await new Promise<string>(accept => {
 			bootstrap({
-				shouldExit: false,
+				shouldExitOnError: false,
 				run: async () => {
 					accept('done');
 				}
@@ -89,9 +89,24 @@ describe('bootstrap', () => {
 	it('can run with a synchronous register function', async () => {
 		const returned = await new Promise<string>(accept => {
 			bootstrap({
-				shouldExit: false,
+				shouldExitOnError: false,
 				register: async () => {},
 				run: async () => {
+					accept('done');
+				}
+			});
+		});
+
+		expect(returned).toBe('done');
+	});
+
+	it('can call a onComplete method', async () => {
+		const returned = await new Promise<string>(accept => {
+			bootstrap({
+				shouldExitOnError: false,
+				register: async () => { },
+				run: async () => { },
+				onComplete: async () => {
 					accept('done');
 				}
 			});
@@ -104,7 +119,7 @@ describe('bootstrap', () => {
 		spyOn(console, 'error');
 
 		bootstrap({
-			shouldExit: false,
+			shouldExitOnError: false,
 			register: async () => {
 				throw new Error('test');
 			},
