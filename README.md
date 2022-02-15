@@ -49,11 +49,11 @@ Next, your run function is called. This could be the main function of the applic
 
 ### Exit
 
-After the run function completes, the application will exit (you can change this by setting `shouldExit: false`)
+After the run function completes, the `onComplete` method will be called.
 
 ### Error
 
 If an exception is thrown or a promise is rejected during register or run, the errorHandler function will be called.
-- If `shouldExit` is true (default), the application will exit with a non-zero exit code
+- If `shouldExitOnError` is true (default), the application will exit with a non-zero exit code
 - If `errorHandler` is not set, `console.error` will be used to log the error
 - If the error occured in the register function, the run function will not be called
