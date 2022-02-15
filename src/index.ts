@@ -12,8 +12,11 @@ export interface BootstrapOptions {
 	// Entrypoint
 	run: BootstrapFunction;
 
-	// Should exit after program completes?
-	shouldExit?: boolean;
+	// Callback to run on successs
+	onComplete?: () => void;
+
+	// Should exit after unhandled exception?
+	shouldExitOnError?: boolean;
 
 	// (Optional) Error handling function for uncaught errors
 	errorHandler?: ErrorHandlerFunction;
@@ -25,7 +28,8 @@ export interface BootstrapOptions {
 export const defaultOptions: BootstrapOptions = {
 	register: null,
 	run: null,
-	shouldExit: true,
+	onComplete: () => { },
+	shouldExitOnError: true,
 	errorHandler: console.error
 };
 
@@ -41,16 +45,12 @@ export function bootstrap(options: BootstrapOptions): void {
 		.then(async () => {
 			return await Promise.resolve(options.run());
 		})
-		.then((returned) => {
-			if (options.shouldExit) {
-				process.exit(returned ? returned : 0);
-			}
-		})
+		.then(options.onComplete)
 		.catch(async e => {
 			// Handle or log the error
 			await Promise.resolve(options.errorHandler(e));
 
-			if (options.shouldExit) {
+			if (options.shouldExitOnError) {
 				process.exit(e.code ?? 1);
 			}
 		});
@@ -71,7 +71,7 @@ export async function bootstrapPromise(
 			register: register,
 			run: async () => accept(),
 			errorHandler: async (...e) => reject(...e),
-			shouldExit: false,
+			shouldExitOnError: false,
 		});
 	});
 }
