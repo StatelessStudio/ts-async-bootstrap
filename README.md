@@ -15,6 +15,8 @@ When writing node applications, it's a good idea to split up your initialization
 **Usage**
 
 ```typescript
+import { bootstrap } from '../src';
+
 async function setup(): Promise<void> {
 	// TODO: Setup some stuff!
 }

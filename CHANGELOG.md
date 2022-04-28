@@ -5,6 +5,7 @@
 ### Additions
 
 ### Fixes
+- [Issue #6] Readme example should show import
 
 ## [2.0.0]
 
