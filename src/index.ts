@@ -19,6 +19,9 @@ export interface BootstrapOptions {
 	// Callback to run after main returns or throws exception
 	onFinally?: RunFunction;
 
+	// Callback to run on exiting
+	teardown?: RunFunction;
+
 	// Should exit after unhandled exception?
 	shouldExitOnError?: boolean;
 
@@ -51,6 +54,11 @@ export class Bootstrap {
 	protected register: RunFunction = async () => { };
 
 	/**
+	 * Teardown function runs before the application exits
+	 */
+	protected teardown: RunFunction = async () => { };
+
+	/**
 	 * onComplete runs when the run function returns (.then())
 	 */
 	protected onComplete: RunFunction = async () => { };
@@ -71,6 +79,10 @@ export class Bootstrap {
 	protected isBooted = false;
 
 	public constructor(options: BootstrapOptions = defaultOptions) {
+		process.on('SIGINT', this.exit.bind(this));
+		process.on('SIGTERM', this.exit.bind(this));
+		process.on('exit', this.exit.bind(this));
+
 		if (options.register) {
 			this.setRegister(options.register);
 		}
@@ -81,6 +93,10 @@ export class Bootstrap {
 
 		if (options.onFinally) {
 			this.setOnFinally(options.onFinally);
+		}
+
+		if (options.teardown) {
+			this.setTeardown(options.teardown);
 		}
 
 		if (options.shouldExitOnError !== null) {
@@ -98,6 +114,8 @@ export class Bootstrap {
 	 * @param run Run function
 	 */
 	public boot(run: RunFunction): void {
+		this.isBooted = true;
+
 		Promise.resolve(this.register ? this.register() : null)
 			.then(async () => await Promise.resolve(run()))
 			.then(async () => await Promise.resolve(this.onComplete()))
@@ -106,7 +124,7 @@ export class Bootstrap {
 				await Promise.resolve(this.onError(e));
 
 				if (this.shouldExitOnError) {
-					process.exit(e.code ?? 1);
+					this.exit.bind(this)(e.code ?? 1);
 				}
 			})
 			.finally(async () => await Promise.resolve(this.onFinally()));
@@ -124,12 +142,35 @@ export class Bootstrap {
 		});
 	}
 
+	/**
+	 * Gracefully exit
+	 *
+	 * @param code Exit code
+	 */
+	public exit(code = 1): void {
+		if (!this.isBooted) {
+			process.exit(code);
+		}
+
+		this.isBooted = false;
+
+		Promise.resolve(this.teardown()).finally(() => process.exit(code));
+	}
+
 	public setRegister(register: RunFunction): void {
 		if (this.isBooted) {
 			throw new Error('Cannot setRegister() after boot');
 		}
 
 		this.register = register.bind(this);
+	}
+
+	public setTeardown(teardown: RunFunction): void {
+		if (this.isBooted) {
+			throw new Error('Cannot setTeardown() after boot');
+		}
+
+		this.teardown = teardown.bind(this);
 	}
 
 	public setOnComplete(onComplete: RunFunction): void {
