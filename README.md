@@ -12,7 +12,7 @@ When writing node applications, it's a good idea to split up your initialization
 
 `npm i ts-async-bootstrap`
 
-**Usage**
+**Usage (Option 1)**
 
 ```typescript
 import { bootstrap } from '../src';
@@ -37,6 +37,30 @@ bootstrap({
 	run: main,
 	errorHandler: errorHandler
 });
+```
+
+**Usage (Option 2)**
+
+```typescript
+import { Bootstrap } from 'ts-async-bootstrap';
+
+class AppBootstrap extends Bootstrap {
+	register = () => {
+		// TODO: Setup some stuff!
+	}
+
+	onError = (e: Error) => {
+		// TODO: Log some stuff!
+	}
+}
+
+async function main(): Promise<void> {
+	// TODO: Run some stuff!
+}
+
+export const app = new AppBootstrap();
+app.boot(main);
+
 ```
 
 ## Lifecycle

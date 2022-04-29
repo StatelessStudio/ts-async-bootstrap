@@ -5,6 +5,7 @@
 ### Additions
 - [Issue #11] onComplete should accept functions that return Promise
 - [Issue #10] BootstrapFunction should accept return type void or Promise<void>
+- [Issue #9] Add bootstrap class for cleaner extension
 - [Issue #7] Add onFinally method
 
 ### Fixes
