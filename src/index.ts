@@ -15,6 +15,9 @@ export interface BootstrapOptions {
 	// Callback to run on successs
 	onComplete?: () => void;
 
+	// Callback to run after main returns or throws exception
+	onFinally?: () => void;
+
 	// Should exit after unhandled exception?
 	shouldExitOnError?: boolean;
 
@@ -29,6 +32,7 @@ export const defaultOptions: BootstrapOptions = {
 	register: null,
 	run: null,
 	onComplete: () => { },
+	onFinally: () => { },
 	shouldExitOnError: true,
 	errorHandler: console.error
 };
@@ -53,6 +57,9 @@ export function bootstrap(options: BootstrapOptions): void {
 			if (options.shouldExitOnError) {
 				process.exit(e.code ?? 1);
 			}
+		})
+		.finally(async () => {
+			await Promise.resolve(options.onFinally());
 		});
 }
 

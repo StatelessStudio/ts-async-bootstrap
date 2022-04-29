@@ -3,6 +3,7 @@
 ## [2.1.0]
 
 ### Additions
+- [Issue #7] Add onFinally method
 
 ### Fixes
 - [Issue #6] Readme example should show import

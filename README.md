@@ -59,3 +59,7 @@ If an exception is thrown or a promise is rejected during register or run, the e
 - If `shouldExitOnError` is true (default), the application will exit with a non-zero exit code
 - If `errorHandler` is not set, `console.error` will be used to log the error
 - If the error occured in the register function, the run function will not be called
+
+### Finally
+
+Regardless of success or fail, `onFinally` will run after `onComplete` or `errorHandler`.

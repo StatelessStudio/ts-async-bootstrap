@@ -115,6 +115,21 @@ describe('bootstrap', () => {
 		expect(returned).toBe('done');
 	});
 
+	it('can call a onFinally method', async () => {
+		const returned = await new Promise<string>(accept => {
+			bootstrap({
+				shouldExitOnError: false,
+				register: async () => { },
+				run: async () => { },
+				onFinally: async () => {
+					accept('done');
+				}
+			});
+		});
+
+		expect(returned).toBe('done');
+	});
+
 	it('logs to console if no error handler is provided', async () => {
 		spyOn(console, 'error');
 
