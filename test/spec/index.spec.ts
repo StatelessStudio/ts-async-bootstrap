@@ -1,5 +1,5 @@
 import 'jasmine';
-import { BootstrapOptions, bootstrap, bootstrapPromise } from '../src';
+import { BootstrapOptions, bootstrap, bootstrapPromise } from '../../src';
 
 describe('BootstrapOptions', () => {
 	it('accepts a register function', () => {
