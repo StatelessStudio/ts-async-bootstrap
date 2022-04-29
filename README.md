@@ -12,9 +12,11 @@ When writing node applications, it's a good idea to split up your initialization
 
 `npm i ts-async-bootstrap`
 
-**Usage**
+**Usage (Option 1)**
 
 ```typescript
+import { bootstrap } from '../src';
+
 async function setup(): Promise<void> {
 	// TODO: Setup some stuff!
 }
@@ -37,6 +39,30 @@ bootstrap({
 });
 ```
 
+**Usage (Option 2)**
+
+```typescript
+import { Bootstrap } from 'ts-async-bootstrap';
+
+class AppBootstrap extends Bootstrap {
+	register = () => {
+		// TODO: Setup some stuff!
+	}
+
+	onError = (e: Error) => {
+		// TODO: Log some stuff!
+	}
+}
+
+async function main(): Promise<void> {
+	// TODO: Run some stuff!
+}
+
+export const app = new AppBootstrap();
+app.boot(main);
+
+```
+
 ## Lifecycle
 
 ### Register
@@ -57,3 +83,7 @@ If an exception is thrown or a promise is rejected during register or run, the e
 - If `shouldExitOnError` is true (default), the application will exit with a non-zero exit code
 - If `errorHandler` is not set, `console.error` will be used to log the error
 - If the error occured in the register function, the run function will not be called
+
+### Finally
+
+Regardless of success or fail, `onFinally` will run after `onComplete` or `errorHandler`.

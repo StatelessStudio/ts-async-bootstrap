@@ -1,5 +1,5 @@
 import 'jasmine';
-import { BootstrapOptions, bootstrap, bootstrapPromise } from '../src';
+import { BootstrapOptions, bootstrap, bootstrapPromise } from '../../src';
 
 describe('BootstrapOptions', () => {
 	it('accepts a register function', () => {
@@ -107,6 +107,21 @@ describe('bootstrap', () => {
 				register: async () => { },
 				run: async () => { },
 				onComplete: async () => {
+					accept('done');
+				}
+			});
+		});
+
+		expect(returned).toBe('done');
+	});
+
+	it('can call a onFinally method', async () => {
+		const returned = await new Promise<string>(accept => {
+			bootstrap({
+				shouldExitOnError: false,
+				register: async () => { },
+				run: async () => { },
+				onFinally: async () => {
 					accept('done');
 				}
 			});
