@@ -1,4 +1,5 @@
-export type BootstrapFunction = () => Promise<void | number>;
+export type RunFunction = () => void | number | Promise<void | number>;
+export type BootstrapFunction = RunFunction; // Deprecated, TODO: Remove in v3
 export type ErrorHandlerFunction = (e: Error) => void | Promise<void>;
 
 /**
@@ -7,16 +8,16 @@ export type ErrorHandlerFunction = (e: Error) => void | Promise<void>;
 export interface BootstrapOptions {
 	// (Optional) Register function runs before entrypoint, and is useful
 	//	for setting up services etc
-	register?: BootstrapFunction;
+	register?: RunFunction;
 
 	// Entrypoint
-	run: BootstrapFunction;
+	run: RunFunction;
 
 	// Callback to run on successs
-	onComplete?: () => void;
+	onComplete?: RunFunction;
 
 	// Callback to run after main returns or throws exception
-	onFinally?: () => void;
+	onFinally?: RunFunction;
 
 	// Should exit after unhandled exception?
 	shouldExitOnError?: boolean;
@@ -46,10 +47,8 @@ export function bootstrap(options: BootstrapOptions): void {
 	options = { ...defaultOptions, ...options };
 
 	Promise.resolve(options.register ? options.register() : null)
-		.then(async () => {
-			return await Promise.resolve(options.run());
-		})
-		.then(options.onComplete)
+		.then(async () => await Promise.resolve(options.run()))
+		.then(async () => await Promise.resolve(options.onComplete()))
 		.catch(async e => {
 			// Handle or log the error
 			await Promise.resolve(options.errorHandler(e));
@@ -58,9 +57,7 @@ export function bootstrap(options: BootstrapOptions): void {
 				process.exit(e.code ?? 1);
 			}
 		})
-		.finally(async () => {
-			await Promise.resolve(options.onFinally());
-		});
+		.finally(async () => await Promise.resolve(options.onFinally()));
 }
 
 /**
@@ -71,7 +68,7 @@ export function bootstrap(options: BootstrapOptions): void {
  * @param register Register function
  */
 export async function bootstrapPromise(
-	register: BootstrapFunction
+	register: RunFunction
 ): Promise<void> {
 	return await new Promise<void>((accept, reject) => {
 		bootstrap({
